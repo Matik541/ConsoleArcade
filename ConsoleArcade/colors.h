@@ -1,6 +1,75 @@
 #pragma once
 
 namespace dye {
+	/*
+	main definition for ANSI escape codes
+	*/
+	extern const char* definition = "\033[";
+
+	/*
+	* Set the foreground color to the specified color.
+	* 
+	* @param color The color to set the foreground to.
+	* @return Auto print! The ANSI escape sequence to set the foreground color.
+	*/
+	void fg_custom(const char* color) {
+		printf("%s38;5;%sm", definition, color);
+	};
+	
+	/*
+	* Set the foreground color to the specified color.
+	*
+	* @param color The color to set the foreground to.
+	* @return Auto print! The ANSI escape sequence to set the foreground color.
+	*/
+	void fg_custom(int color) {
+		printf("%s38;5;%dm", definition, color);
+	};
+	
+	/*
+	* Set the foreground color to the specified color using RGB values.
+	*
+	* @param r	The red value of the color to set the foreground to.
+	* @param g	The green value of the color to set the foreground to.
+	* @param b	The blue value of the color to set the foreground to.
+	* @return Auto print! The ANSI escape sequence to set the foreground color.
+	*/
+	void fg_custom(int r, int g, int b) {
+		printf("%s38;2;%dm;%dm;%dm", definition, r, g, b);
+	};
+
+	/*
+	* Set the background color to the specified color.
+	*
+	* @param color The color to set the background to.
+	* @return Auto print! The ANSI escape sequence to set the background color.
+	*/
+	void bg_custom(const char* color) {
+		printf("%s48;5;%sm", definition, color);
+	};
+
+	/*
+	* Set the background color to the specified color.
+	*
+	* @param color The color to set the background to.
+	* @return Auto print! The ANSI escape sequence to set the background color.
+	*/
+	void bg_custom(int color) {
+		printf("%s48;5;%dm", definition, color);
+	};
+
+	/*
+	* Set the background color to the specified color using RGB values.
+	*
+	* @param r	The red value of the color to set the background to.
+	* @param g	The green value of the color to set the background to.
+	* @param b	The blue value of the color to set the background to.
+	* @return Auto print! The ANSI escape sequence to set the background color.
+	*/
+	void bg_custom(int r, int g, int b) {
+		printf("%s48;2;%dm;%dm;%dm", definition, r, g, b);
+	};
+	
 	extern const char* reset = "\033[0m";
 	extern const char* bold = "\033[1m";
 	extern const char* dim = "\033[2m";
@@ -38,7 +107,7 @@ namespace dye {
 	extern const char* bright_magenta = "\033[95m";
 	extern const char* bright_cyan = "\033[96m";
 	extern const char* bright_white = "\033[97m";
-	
+
 	extern const char* bg_bright_black = "\033[100m";
 	extern const char* bg_bright_red = "\033[101m";
 	extern const char* bg_bright_green = "\033[102m";

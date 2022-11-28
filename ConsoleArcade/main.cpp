@@ -1,12 +1,29 @@
-﻿// ConsoleArcade.cpp : Ten plik zawiera funkcję „main”. W nim rozpoczyna się i kończy wykonywanie programu.
-//
-
-#include <iostream>
+﻿#include <iostream>
 #include <string>
 #include <ctime>
+#include <stdio.h>
 
 #include "colors.h"
 #include "functions.h"
+
+class nim {
+public:
+	const char* colors[2] = { dye::red, dye::blue };
+	int turn;
+	int value;
+
+	virtual int bot_turn() = 0;
+	virtual void play() {}
+
+	nim() {
+		turn = 0;
+		value = 0;
+	}
+	~nim() {
+		delete this;
+	}
+
+};
 
 class tic_tac_toe
 {
@@ -186,6 +203,15 @@ public:
 
 	void play(bool bot)
 	{
+		std::cout
+			<< "Quick who to:" << std::endl
+			<< "- Choose number beetwen 1 - 9 to select field" << std::endl
+			<< "- You can't select a taken field" << std::endl
+			<< "- If you place 3 of your symbols (X, O) in a column, row or diagonal, you win!" << std::endl;
+		if (bot) {
+			std::cout << "- Bot you play with is a tough opponent ;)" << std::endl;
+		}
+
 		int pos;
 		while (!is_winner() && !is_draw())
 		{
@@ -194,7 +220,7 @@ public:
 			if (bot && turn % 2 == 1)
 			{
 				pos = bot_turn();
-				std::cout << pos << dye::reset << std::endl;
+				std::cout << pos << dye::reset << std::endl << std::endl;
 			}
 			else
 			{
@@ -206,14 +232,16 @@ public:
 					try
 					{
 						pos = std::stoi(input);
+						if (pos < 1 || pos > 9) {
+							std::cout << dye::red << "ERR: " << dye::bold << "Invalid input" << std::endl << dye::reset;
+							continue;
+						}
 					}
 					catch (std::exception e)
 					{
-						std::cout << "\033[91mERR: \033[1mInvalid input\033[0m\n";
+						std::cout << dye::red << "ERR: " << dye::bold << "Invalid input" << std::endl << dye::reset;
 						continue;
 					}
-
-					pos = std::stoi(input.substr(0, 1));
 				} while (pos < 1 || pos > 9);
 			}
 			if (mark_board(pos))
@@ -224,6 +252,7 @@ public:
 		{
 			turn++;
 			std::cout << std::endl
+				<< dye::yellow << dye::bold << "Game Over!" << std::endl
 				<< colors[turn % 2] << "Player " << players[turn % 2] << dye::reset << dye::bold << " wins!" << dye::reset << std::endl;
 		}
 		else
@@ -235,11 +264,12 @@ public:
 
 };
 
-class g2048 {
+class game_2048 {
 
 private:
 	int board[4][4];
 	int score;
+	int colors[11] = { 208, 172, 136, 100, 64, 28, 29, 30, 31, 32, 33 };
 	int check()
 	{
 		int empty = 0;
@@ -264,7 +294,7 @@ private:
 			for (int j = 0; j < 4; j++)
 				temp[i][j] = board[i][j];
 
-		std::cout << "Score: " << dye::magenta << score << dye::reset << " | ";
+		std::cout << "Score: " << dye::bright_magenta << score << dye::reset << " | ";
 		if (direction == 0)
 		{
 			for (int i = 0; i < 4; i++)
@@ -282,7 +312,7 @@ private:
 							}
 							else if (temp[k][j] == temp[k + 1][j])
 							{
-								std::cout << dye::bright_green << "+" << pow(2, temp[k][j]) << dye::reset;
+								std::cout << dye::bright_green << "+" << pow(2, temp[k][j]) << " " << dye::reset;
 								score += pow(2, temp[k][j]);
 								temp[k][j] += 1;
 								temp[k + 1][j] = 0;
@@ -309,7 +339,7 @@ private:
 							}
 							else if (temp[i][k] == temp[i][k + 1])
 							{
-								std::cout << dye::bright_green << "+" << pow(2, temp[i][k]) << dye::reset;
+								std::cout << dye::bright_green << "+" << pow(2, temp[i][k]) << " " << dye::reset;
 								score += pow(2, temp[i][k]);
 								temp[i][k + 1] = 0;
 								temp[i][k] += 1;
@@ -336,7 +366,7 @@ private:
 							}
 							else if (temp[k][j] == temp[k - 1][j])
 							{
-								std::cout << dye::bright_green << "+" << pow(2, temp[k][j]) << dye::reset;
+								std::cout << dye::bright_green << "+" << pow(2, temp[k][j]) << " " << dye::reset;
 								score += pow(2, temp[k][j]);
 								temp[k][j] += 1;
 								temp[k - 1][j] = 0;
@@ -363,7 +393,7 @@ private:
 							}
 							else if (temp[i][k] == temp[i][k - 1])
 							{
-								std::cout << dye::bright_green << "+" << pow(2, temp[i][k]) << dye::reset;
+								std::cout << dye::bright_green << "+" << pow(2, temp[i][k]) << " " << dye::reset;
 								score += pow(2, temp[i][k]);
 								temp[i][k] += 1;
 								temp[i][k - 1] = 0;
@@ -389,23 +419,16 @@ private:
 					<< "|";
 				for (int l = 0; l < 4; l++)
 				{
-					int value = pow(2, board[i][l]);
-					if (j == 0)
-						value = value / 100;
-					else
-						value = value % 100;
+					std::string value = std::to_string(pow(2, board[i][l]));
+					for (int x = (int)value.size() - 1; x < 4; x++)
+						value += ' ';
+					dye::fg_custom(colors[board[i][l]]);
 
-					std::cout << " ";
-					if (board[i][l] == 0 || value == 0)
-						std::cout << "  ";
+					if (board[i][l] == 0 || value == "0")
+						std::cout << "   ";
 					else
-					{
-						if (value > 0)
-							std::cout << dye::red << value << dye::reset;
-						if (value < 10)
-							std::cout << " ";
-					}
-					std::cout << " |";
+						std::cout << " " << value[2 * j] << value[2 * j + 1];
+					std::cout << dye::reset << " |";
 				}
 			}
 			std::cout << std::endl;
@@ -445,7 +468,7 @@ private:
 	}
 
 public:
-	g2048()
+	game_2048()
 	{
 		score = 0;
 		for (int i = 0; i < 4; i++)
@@ -456,10 +479,16 @@ public:
 			}
 		}
 	}
-	~g2048() {}
+	~game_2048() {}
 
 	void play()
 	{
+		std::cout
+			<< "Quick who to:" << std::endl
+			<< "- Choose direction to slide board: w (up), a (left), s (down), d (right)" << std::endl
+			<< "- Tiles with the same number merge into one when they touch" << std::endl
+			<< "- If you get one tile with 2048 you win!" << std::endl;
+
 		add_number();
 		int direction = -1;
 		while (check() == 0)
@@ -482,37 +511,87 @@ public:
 					direction = 3;
 				else
 				{
-					std::cout << "\033[91mERR: \033[1mInvalid input\033[0m\n";
+					std::cout << dye::red << "ERR: " << dye::bold << "Invalid input" << std::endl << dye::reset;
 					continue;
 				}
 			} while (direction < 0 || direction > 3);
 			slide_board(direction);
 		}
+
 	}
 };
 
-class choose20
+class game_subtraction : private nim {
+};
+
+class game_21 : private nim
 {
 private:
-	const char* colors[2] = { dye::red, dye::blue };
-	int turn;
-	int value;
-
-	int bot_turn() {}
+	int bot_turn() {
+		return 1;
+	}
 
 public:
-	choose20() {
+	game_21() {
 		turn = 0;
 		value = 20;
 	}
-	~choose20() {}
+	~game_21() {}
+
+	void play(bool bot) {
+		std::cout
+			<< "Quick who to:" << std::endl
+			<< "- Choose number beetwen 1 - 3" << std::endl
+			<< "- When the number reaches zero, the last player wins" << std::endl;
+		if (bot) {
+			std::cout << "- Bot you play with is a tough opponent ;)" << std::endl;
+		}
+
+		int pos;
+		while (value > 0)
+		{
+			std::cout << colors[turn % 2] << "Player " << turn % 2 << "\'s " << dye::reset << "turn: " << dye::bright_green;
+			if (bot && turn % 2 == 1)
+			{
+				pos = bot_turn();
+				std::cout << pos << dye::reset << std::endl;
+			}
+			else
+			{
+				do
+				{
+					std::string input;
+					std::cin >> input;
+					std::cout << dye::reset << std::endl;
+					try
+					{
+						pos = std::stoi(input);
+						if (pos < 1 || pos > 3) {
+							std::cout << dye::red << "ERR: " << dye::bold << "Invalid input" << std::endl << dye::reset;
+							continue;
+						}
+					}
+					catch (std::exception e)
+					{
+						std::cout << dye::red << "ERR: " << dye::bold << "Invalid input" << std::endl << dye::reset;
+						continue;
+					}
+				} while (pos < 1 || pos > 3);
+			}
+			value -= pos;
+			turn++;
+		}
+		std::cout << "Game over!" << std::endl;
+	}
 };
 
 int main()
-{
+{	
 	std::cout << "Which game do you want to play?" << std::endl
 		<< dye::bright_magenta << "1. " << dye::reset << "Tic Tac Toe" << std::endl
 		<< dye::bright_magenta << "2. " << dye::reset << "2048: " << std::endl
+		<< dye::bright_magenta << "3. " << dye::reset << "Choose 20: " << std::endl
+		<< dye::bright_magenta << "4. " << dye::reset << "Choose 100: " << std::endl
 		<< dye::bright_green;
 
 	int game;
@@ -548,8 +627,14 @@ int main()
 	}
 	case 2:
 	{
-		g2048 game;
+		game_2048 game;
 		game.play();
+		break;
+	}
+	case 3:
+	{
+		game_21 game;
+		game.play(false);
 		break;
 	}
 	default:
